@@ -1,0 +1,199 @@
+{
+  "name": "Dharshini_Studybuddy",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message",
+          "*"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "b842a0b6-4d8b-45ea-bc49-f87021f27a95",
+      "name": "Telegram Trigger",
+      "webhookId": "5777987b-ccdf-49de-b1d0-507ba051984e",
+      "credentials": {
+        "telegramApi": {
+          "id": "ecABhXtQj6vsaulg",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "You are a study buddy.Who reminds the user that it is their study time and also motivates them for even a small achievement and helps them to send email to their friends asking them to come for a group study.It constantly assists them in every possible way and help the user to study effectively..it lso stores the study sessions and what they studiend in memory\ntools:using \"send_mail\" it sends mail to their friend inviting for a group study session \nnote:dont hallucinate.If u dont know anything ask again"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "55ae9459-61e5-496b-b2e8-ddc052f7b10c",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        80,
+        208
+      ],
+      "id": "23d5e406-01f5-4095-9b51-dd1afa751bec",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "oSM5RAcmf7ukjw6B",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.message.text }}",
+        "contextWindowLength": 1000
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        224,
+        208
+      ],
+      "id": "a0d252aa-b31b-453b-9560-f4b390908c05",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "sendTo": "=dharshinir24cs@psnacet.edu.in",
+        "subject": "Study time!",
+        "emailType": "text",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        368,
+        208
+      ],
+      "id": "9441b7d2-6203-4c2a-a74f-592cdacc12b4",
+      "name": "Send a message in Gmail",
+      "webhookId": "b59b8a49-8b46-4e8a-b25c-0d8933b2a9c7",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "GF5I6afkguhGDaAF",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        560,
+        0
+      ],
+      "id": "2710d6f1-f4cd-4f2b-a3e0-09015dee52c5",
+      "name": "Send a text message",
+      "webhookId": "26226586-23b8-47cb-9b72-438a3e97a136",
+      "credentials": {
+        "telegramApi": {
+          "id": "ecABhXtQj6vsaulg",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a918f0c5-b18b-4311-9812-d3d83c46cb22",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "aba3fef3db4c1cdf43c02dfda290e6e4b7b9a3df3030c13adac832be4e03a9fc"
+  },
+  "id": "PMvsJ68MxKDjsA2Y",
+  "tags": []
+}
